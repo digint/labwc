@@ -1014,7 +1014,9 @@ view_move_to_edge(struct view *view, const char *direction)
 		return;
 	}
 
-	view_move(view, view->current.x + dx, view->current.y + dy);
+	view_move(view,
+		  dx ? view->current.x + dx : view->pending.x,
+		  dy ? view->current.y + dy : view->pending.y);
 }
 
 static enum view_edge
