@@ -1113,32 +1113,34 @@ view_shrink_to_edge(struct view *view, const char *direction)
 
 	struct edge_manip_hints em = view_get_edge_manip_hints(view);
 	struct wlr_box geo = view->pending;
+	int max_dx = MIN(em.width_max_dx,  view->pending.width  / 2);
+	int max_dy = MIN(em.height_max_dy, view->pending.height / 2);
 	int dx = 0, dy = 0;
 	int near, far;
 
 	if (!strcasecmp(direction, "left")) {
 		// right edge to left/right edges
 		_view_get_next_edges(view, direction,
-			em.right_edge, -em.width_max_dx, 0, -rc.gap, &near, &far);
+			em.right_edge, -max_dx, 0, -rc.gap, &near, &far);
 		dx = MAX(near, far);
 		geo.width += dx;
 	} else if (!strcasecmp(direction, "up")) {
 		// bottom edge to top/bottom edges
 		_view_get_next_edges(view, direction,
-			em.bottom_edge, -em.height_max_dy, 0, -rc.gap, &near, &far);
+			em.bottom_edge, -max_dy, 0, -rc.gap, &near, &far);
 		dy = MAX(near, far);
 		geo.height += dy;
 	} else if (!strcasecmp(direction, "right")) {
 		// left edge to left/right edges
 		_view_get_next_edges(view, direction,
-			em.left_edge, em.width_max_dx, 0, rc.gap, &near, &far);
+			em.left_edge, max_dx, 0, rc.gap, &near, &far);
 		dx = MIN(near, far);
 		geo.width -= dx;
 		geo.x     += dx;
 	} else if (!strcasecmp(direction, "down")) {
 		// top edge to top/bottom edges
 		_view_get_next_edges(view, direction,
-			em.top_edge, em.height_max_dy, 0, rc.gap, &near, &far);
+			em.top_edge, max_dy, 0, rc.gap, &near, &far);
 		dy = MIN(near, far);
 		geo.height -= dy;
 		geo.y      += dy;
