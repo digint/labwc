@@ -54,6 +54,55 @@ view_edge_invert(enum view_edge edge)
 	}
 }
 
+struct edge_manip_hints {
+	int left_edge;
+	int top_edge;
+	int right_edge;
+	int bottom_edge;
+
+	int left_max_dx;
+	int up_max_dy;
+	int right_max_dx;
+	int down_max_dy;
+
+	int width_max_dx;
+	int height_max_dy;
+};
+
+static struct edge_manip_hints
+view_get_edge_manip_hints(struct view *view) {
+	struct output *output = view->output;
+	struct border margin = ssd_get_margin(view->ssd);
+	struct wlr_box usable = output_usable_area_in_layout_coords(output);
+	if (usable.height == output->wlr_output->height
+			&& output->wlr_output->scale != 1) {
+		usable.height /= output->wlr_output->scale;
+	}
+	if (usable.width == output->wlr_output->width
+			&& output->wlr_output->scale != 1) {
+		usable.width /= output->wlr_output->scale;
+	}
+
+	struct edge_manip_hints hints = {
+		.left_edge    = view->current.x - margin.left,
+		.top_edge     = view->current.y - margin.top,
+		.right_edge   = view->current.x + view->pending.width  + margin.right,
+		.bottom_edge  = view->current.y + view->pending.height + margin.bottom,
+
+		.left_max_dx  = usable.x + margin.left + rc.gap - view->current.x,
+		.up_max_dy    = usable.y + margin.top  + rc.gap - view->current.y,
+		.right_max_dx = usable.x + usable.width  - view->pending.width
+		                - margin.right  - rc.gap - view->current.x,
+		.down_max_dy  = usable.y + usable.height - view->pending.height
+		                - margin.bottom - rc.gap - view->current.y,
+
+		.width_max_dx  = MAX(view->current.width  - LAB_MIN_VIEW_WIDTH,  0),
+		.height_max_dy = MAX(view->current.height - LAB_MIN_VIEW_HEIGHT, 0),
+	};
+
+	return hints;
+}
+
 static struct wlr_box
 view_get_edge_snap_box(struct view *view, struct output *output,
 		enum view_edge edge)
