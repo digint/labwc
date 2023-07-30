@@ -198,6 +198,7 @@ void view_toggle_fullscreen(struct view *view);
 void view_adjust_for_layout_change(struct view *view);
 void view_move_to_edge(struct view *view, const char *direction, const char *snap);
 void view_grow_to_edge(struct view *view, const char *direction);
+void view_shrink_to_edge(struct view *view, const char *direction);
 void view_snap_to_edge(struct view *view, const char *direction,
 	bool store_natural_geometry);
 void view_snap_to_region(struct view *view, struct region *region,

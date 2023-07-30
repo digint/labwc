@@ -1094,6 +1094,62 @@ view_grow_to_edge(struct view *view, const char *direction)
 	view_move_resize(view, geo);
 }
 
+void
+view_shrink_to_edge(struct view *view, const char *direction)
+{
+	assert(view);
+	if (view->fullscreen || view->maximized)
+		return;
+
+	struct output *output = view->output;
+	if (!output_is_usable(output)) {
+		wlr_log(WLR_ERROR, "view has no output, not shrinking view");
+		return;
+	}
+	if (!direction) {
+		wlr_log(WLR_ERROR, "invalid direction, not shrinking view");
+		return;
+	}
+
+	struct edge_manip_hints em = view_get_edge_manip_hints(view);
+	struct wlr_box geo = view->pending;
+	int dx = 0, dy = 0;
+	int near, far;
+
+	if (!strcasecmp(direction, "left")) {
+		// right edge to left/right edges
+		_view_get_next_edges(view, direction,
+			em.right_edge, -em.width_max_dx, 0, -rc.gap, &near, &far);
+		dx = MAX(near, far);
+		geo.width += dx;
+	} else if (!strcasecmp(direction, "up")) {
+		// bottom edge to top/bottom edges
+		_view_get_next_edges(view, direction,
+			em.bottom_edge, -em.height_max_dy, 0, -rc.gap, &near, &far);
+		dy = MAX(near, far);
+		geo.height += dy;
+	} else if (!strcasecmp(direction, "right")) {
+		// left edge to left/right edges
+		_view_get_next_edges(view, direction,
+			em.left_edge, em.width_max_dx, 0, rc.gap, &near, &far);
+		dx = MIN(near, far);
+		geo.width -= dx;
+		geo.x     += dx;
+	} else if (!strcasecmp(direction, "down")) {
+		// top edge to top/bottom edges
+		_view_get_next_edges(view, direction,
+			em.top_edge, em.height_max_dy, 0, rc.gap, &near, &far);
+		dy = MIN(near, far);
+		geo.height -= dy;
+		geo.y      += dy;
+	} else {
+		wlr_log(WLR_ERROR, "invalid direction: %s", direction);
+		return;
+	}
+
+	view_move_resize(view, geo);
+}
+
 static enum view_edge
 view_edge_parse(const char *direction)
 {
