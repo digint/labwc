@@ -179,6 +179,11 @@ action_arg_from_xml_node(struct action *action, char *nodename, char *content)
 		}
 		break;
 	case ACTION_TYPE_MOVE_TO_EDGE:
+		if (!strcmp(argument, "snap")) {
+			action_arg_add_str(action, argument, content);
+			goto cleanup;
+		}
+		/* Falls through */
 	case ACTION_TYPE_SNAP_TO_EDGE:
 		if (!strcmp(argument, "direction")) {
 			action_arg_add_str(action, argument, content);
@@ -564,7 +569,9 @@ actions_run(struct view *activator, struct server *server,
 			break;
 		case ACTION_TYPE_MOVE_TO_EDGE:
 			if (view) {
-				view_move_to_edge(view, action_str_from_arg(arg));
+				const char *direction = get_arg_value_str(action, "direction", NULL);
+				const char *snap = get_arg_value_str(action, "snap", "window");
+				view_move_to_edge(view, direction, snap);
 			}
 			break;
 		case ACTION_TYPE_SNAP_TO_EDGE:

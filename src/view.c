@@ -965,7 +965,7 @@ _view_get_next_edges(struct view *view, const char *direction, int point,
 }
 
 void
-view_move_to_edge(struct view *view, const char *direction)
+view_move_to_edge(struct view *view, const char *direction, const char *snap)
 {
 	assert(view);
 	struct output *output = view->output;
@@ -980,37 +980,57 @@ view_move_to_edge(struct view *view, const char *direction)
 
 	struct edge_manip_hints em = view_get_edge_manip_hints(view);
 	int dx = 0, dy = 0;
-	int near, far;
-	if (!strcasecmp(direction, "left")) {
-		// left edge to left/right edges
-		_view_get_next_edges(view, direction,
-			em.left_edge, em.left_max_dx, rc.gap, 0, &near, &far);
-		dx = MAX(near, far);
-	} else if (!strcasecmp(direction, "up")) {
-		// top edge to top/bottom edges
-		_view_get_next_edges(view, direction,
-			em.top_edge, em.up_max_dy, rc.gap, 0, &near, &far);
-		dy = MAX(near, far);
-	} else if (!strcasecmp(direction, "right")) {
-		// left edge to left/right edges
-		_view_get_next_edges(view, direction,
-			em.left_edge, em.right_max_dx, 0, rc.gap, &near, &far);
-		dx = MIN(near, far);
-		// right edge to left edge
-		_view_get_next_edges(view, direction,
-			em.right_edge, em.right_max_dx, -rc.gap, 0, &near, &far);
-		dx = MIN(dx, near);
-	} else if (!strcasecmp(direction, "down")) {
-		// top edge to top/bottom edges
-		_view_get_next_edges(view, direction,
-			em.top_edge, em.down_max_dy, 0, rc.gap, &near, &far);
-		dy = MIN(near, far);
-		// bottom edge to top edge
-		_view_get_next_edges(view, direction,
-			em.bottom_edge, em.down_max_dy, -rc.gap, 0, &near, &far);
-		dy = MIN(dy, near);
+
+	if(!strcasecmp(snap, "window")) {
+		int near, far;
+		if (!strcasecmp(direction, "left")) {
+			// left edge to left/right edges
+			_view_get_next_edges(view, direction,
+				em.left_edge, em.left_max_dx, rc.gap, 0, &near, &far);
+			dx = MAX(near, far);
+		} else if (!strcasecmp(direction, "up")) {
+			// top edge to top/bottom edges
+			_view_get_next_edges(view, direction,
+				em.top_edge, em.up_max_dy, rc.gap, 0, &near, &far);
+			dy = MAX(near, far);
+		} else if (!strcasecmp(direction, "right")) {
+			// left edge to left/right edges
+			_view_get_next_edges(view, direction,
+				em.left_edge, em.right_max_dx, 0, rc.gap, &near, &far);
+			dx = MIN(near, far);
+			// right edge to left edge
+			_view_get_next_edges(view, direction,
+				em.right_edge, em.right_max_dx, -rc.gap, 0, &near, &far);
+			dx = MIN(dx, near);
+		} else if (!strcasecmp(direction, "down")) {
+			// top edge to top/bottom edges
+			_view_get_next_edges(view, direction,
+				em.top_edge, em.down_max_dy, 0, rc.gap, &near, &far);
+			dy = MIN(near, far);
+			// bottom edge to top edge
+			_view_get_next_edges(view, direction,
+				em.bottom_edge, em.down_max_dy, -rc.gap, 0, &near, &far);
+			dy = MIN(dy, near);
+		} else {
+			wlr_log(WLR_ERROR, "invalid direction: %s", direction);
+			return;
+		}
+	}
+	else if(!strcasecmp(snap, "screen")) {
+		if (!strcasecmp(direction, "left")) {
+			dx = em.left_max_dx;
+		} else if (!strcasecmp(direction, "up")) {
+			dy = em.up_max_dy;
+		} else if (!strcasecmp(direction, "right")) {
+			dx = em.right_max_dx;
+		} else if (!strcasecmp(direction, "down")) {
+			dy = em.down_max_dy;
+		} else {
+			wlr_log(WLR_ERROR, "invalid direction: %s", direction);
+			return;
+		}
 	} else {
-		wlr_log(WLR_ERROR, "invalid direction: %s", direction);
+		wlr_log(WLR_ERROR, "invalid snap: %s", snap);
 		return;
 	}
 
