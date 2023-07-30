@@ -857,6 +857,64 @@ view_on_output_destroy(struct view *view)
 	view->output = NULL;
 }
 
+#define VIEW_GET_NEXT_EDGES(_view_near_def, _view_far_def, _backward)	\
+	struct output *output = view->output;				\
+	struct server *server = output->server;				\
+	struct view *v;							\
+	wl_list_for_each(v, &server->views, link) {			\
+		if (v == view || v->output != output)			\
+			continue;					\
+		struct border margin = ssd_get_margin(v->ssd);		\
+		int vn = (_view_near_def);				\
+		int vf = (_view_far_def);				\
+		if (_backward) {					\
+			if (vf + far_gap  < point)			\
+				f = MAX(f, vf + far_gap  - point);	\
+			if (vn + near_gap < point)			\
+				n = MAX(n, vn + near_gap - point);	\
+		} else {						\
+			if (vf + far_gap  > point)			\
+				f = MIN(f, vf + far_gap  - point);	\
+			if (vn + near_gap > point)			\
+				n = MIN(n, vn + near_gap - point);	\
+		}							\
+	}
+
+
+static void
+_view_get_next_edges(struct view *view, const char *direction, int point,
+		     int max, int near_gap, int far_gap, int *near, int *far)
+{
+	/*
+	 * Returns near and far edges from all views, looking from
+	 * point towards direction. Stops searching at max.
+	 *
+	 * Note that the width and height are ignored when looking for
+	 * edges (left/right only considers x, while up/down only
+	 * considers y). This is intentional as it allows to easily
+	 * align your windows to a grid, defined by all other windows)
+	 */
+	int n = max, f = max;
+	if (!strcasecmp(direction, "left")) {
+		VIEW_GET_NEXT_EDGES(v->current.x + v->current.width + margin.right,
+				    v->current.x - margin.left,
+				    true);
+	} else if (!strcasecmp(direction, "up")) {
+		VIEW_GET_NEXT_EDGES(v->current.y + v->current.height + margin.bottom,
+				    v->current.y - margin.top,
+				    true);
+	} else if (!strcasecmp(direction, "right")) {
+		VIEW_GET_NEXT_EDGES(v->current.x - margin.left,
+				    v->current.x + v->current.width + margin.right,
+				    false);
+	} else if (!strcasecmp(direction, "down")) {
+		VIEW_GET_NEXT_EDGES(v->current.y - margin.top,
+				    v->current.y + v->current.height + margin.bottom,
+				    false);
+	}
+	*near = n; *far = f;
+}
+
 void
 view_move_to_edge(struct view *view, const char *direction)
 {
