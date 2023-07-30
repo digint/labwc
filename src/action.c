@@ -58,6 +58,7 @@ enum action_type {
 	ACTION_TYPE_EXIT,
 	ACTION_TYPE_MOVE_TO_EDGE,
 	ACTION_TYPE_SNAP_TO_EDGE,
+	ACTION_TYPE_GROW_TO_EDGE,
 	ACTION_TYPE_NEXT_WINDOW,
 	ACTION_TYPE_PREVIOUS_WINDOW,
 	ACTION_TYPE_RECONFIGURE,
@@ -94,6 +95,7 @@ const char *action_names[] = {
 	"Exit",
 	"MoveToEdge",
 	"SnapToEdge",
+	"GrowToEdge",
 	"NextWindow",
 	"PreviousWindow",
 	"Reconfigure",
@@ -185,6 +187,7 @@ action_arg_from_xml_node(struct action *action, char *nodename, char *content)
 		}
 		/* Falls through */
 	case ACTION_TYPE_SNAP_TO_EDGE:
+	case ACTION_TYPE_GROW_TO_EDGE:
 		if (!strcmp(argument, "direction")) {
 			action_arg_add_str(action, argument, content);
 			goto cleanup;
@@ -377,6 +380,7 @@ action_is_valid(struct action *action)
 		break;
 	case ACTION_TYPE_MOVE_TO_EDGE:
 	case ACTION_TYPE_SNAP_TO_EDGE:
+	case ACTION_TYPE_GROW_TO_EDGE:
 		arg_name = "direction";
 		break;
 	case ACTION_TYPE_SHOW_MENU:
@@ -578,6 +582,11 @@ actions_run(struct view *activator, struct server *server,
 			if (view) {
 				view_snap_to_edge(view, action_str_from_arg(arg),
 					/*store_natural_geometry*/ true);
+			}
+			break;
+		case ACTION_TYPE_GROW_TO_EDGE:
+			if (view) {
+				view_grow_to_edge(view, action_str_from_arg(arg));
 			}
 			break;
 		case ACTION_TYPE_NEXT_WINDOW:
