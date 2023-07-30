@@ -970,45 +970,51 @@ view_move_to_edge(struct view *view, const char *direction)
 	assert(view);
 	struct output *output = view->output;
 	if (!output_is_usable(output)) {
-		wlr_log(WLR_ERROR, "view has no output, not moving to edge");
+		wlr_log(WLR_ERROR, "view has no output, not moving view");
 		return;
 	}
 	if (!direction) {
-		wlr_log(WLR_ERROR, "invalid edge, not moving view");
+		wlr_log(WLR_ERROR, "invalid direction, not moving view");
 		return;
 	}
 
-	struct border margin = ssd_get_margin(view->ssd);
-	struct wlr_box usable = output_usable_area_in_layout_coords(output);
-	if (usable.height == output->wlr_output->height
-			&& output->wlr_output->scale != 1) {
-		usable.height /= output->wlr_output->scale;
-	}
-	if (usable.width == output->wlr_output->width
-			&& output->wlr_output->scale != 1) {
-		usable.width /= output->wlr_output->scale;
-	}
-
-	int x = 0, y = 0;
+	struct edge_manip_hints em = view_get_edge_manip_hints(view);
+	int dx = 0, dy = 0;
+	int near, far;
 	if (!strcasecmp(direction, "left")) {
-		x = usable.x + margin.left + rc.gap;
-		y = view->pending.y;
+		// left edge to left/right edges
+		_view_get_next_edges(view, direction,
+			em.left_edge, em.left_max_dx, rc.gap, 0, &near, &far);
+		dx = MAX(near, far);
 	} else if (!strcasecmp(direction, "up")) {
-		x = view->pending.x;
-		y = usable.y + margin.top + rc.gap;
+		// top edge to top/bottom edges
+		_view_get_next_edges(view, direction,
+			em.top_edge, em.up_max_dy, rc.gap, 0, &near, &far);
+		dy = MAX(near, far);
 	} else if (!strcasecmp(direction, "right")) {
-		x = usable.x + usable.width - view->pending.width
-			- margin.right - rc.gap;
-		y = view->pending.y;
+		// left edge to left/right edges
+		_view_get_next_edges(view, direction,
+			em.left_edge, em.right_max_dx, 0, rc.gap, &near, &far);
+		dx = MIN(near, far);
+		// right edge to left edge
+		_view_get_next_edges(view, direction,
+			em.right_edge, em.right_max_dx, -rc.gap, 0, &near, &far);
+		dx = MIN(dx, near);
 	} else if (!strcasecmp(direction, "down")) {
-		x = view->pending.x;
-		y = usable.y + usable.height - view->pending.height
-			- margin.bottom - rc.gap;
+		// top edge to top/bottom edges
+		_view_get_next_edges(view, direction,
+			em.top_edge, em.down_max_dy, 0, rc.gap, &near, &far);
+		dy = MIN(near, far);
+		// bottom edge to top edge
+		_view_get_next_edges(view, direction,
+			em.bottom_edge, em.down_max_dy, -rc.gap, 0, &near, &far);
+		dy = MIN(dy, near);
 	} else {
-		wlr_log(WLR_ERROR, "invalid edge, not moving view");
+		wlr_log(WLR_ERROR, "invalid direction: %s", direction);
 		return;
 	}
-	view_move(view, x, y);
+
+	view_move(view, view->current.x + dx, view->current.y + dy);
 }
 
 static enum view_edge
