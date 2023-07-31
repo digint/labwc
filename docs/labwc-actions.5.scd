@@ -63,7 +63,7 @@ Actions are used in menus and keyboard/mouse bindings.
 *<action name="ShrinkToEdge" direction="value" />*
 	Reverse of GrowToEdge. Shrinks by a maximum of 50%.
 
-        *direction* [left|up|right|down] Direction in which to shrink.
+	*direction* [left|up|right|down] Direction in which to shrink.
 
 *<action name="MoveTo" x="" y="" />*
 	Move to position (x, y)
