@@ -985,7 +985,7 @@ view_move_to_edge(struct view *view, const char *direction, const char *snap)
 	struct edge_manip_hints em = view_get_edge_manip_hints(view);
 	int dx = 0, dy = 0;
 
-	if(!strcasecmp(snap, "window")) {
+	if (!strcasecmp(snap, "window")) {
 		int near, far;
 		if (!strcasecmp(direction, "left")) {
 			// left edge to left/right edges
@@ -1020,7 +1020,7 @@ view_move_to_edge(struct view *view, const char *direction, const char *snap)
 			return;
 		}
 	}
-	else if(!strcasecmp(snap, "screen")) {
+	else if (!strcasecmp(snap, "screen")) {
 		if (!strcasecmp(direction, "left")) {
 			dx = em.left_max_dx;
 		} else if (!strcasecmp(direction, "up")) {
