@@ -93,9 +93,9 @@ view_get_edge_manip_hints(struct view *view)
 		.left_max_dx  = usable.x + margin.left + rc.gap - view->current.x,
 		.up_max_dy    = usable.y + margin.top  + rc.gap - view->current.y,
 		.right_max_dx = usable.x + usable.width  - view->pending.width
-		                - margin.right  - rc.gap - view->current.x,
+				- margin.right  - rc.gap - view->current.x,
 		.down_max_dy  = usable.y + usable.height - view->pending.height
-		                - margin.bottom - rc.gap - view->current.y,
+				- margin.bottom - rc.gap - view->current.y,
 
 		.width_max_dx  = MAX(view->current.width  - LAB_MIN_VIEW_WIDTH,  0),
 		.height_max_dy = MAX(view->current.height - LAB_MIN_VIEW_HEIGHT, 0),
