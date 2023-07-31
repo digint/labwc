@@ -70,7 +70,8 @@ struct edge_manip_hints {
 };
 
 static struct edge_manip_hints
-view_get_edge_manip_hints(struct view *view) {
+view_get_edge_manip_hints(struct view *view)
+{
 	struct output *output = view->output;
 	struct border margin = ssd_get_margin(view->ssd);
 	struct wlr_box usable = output_usable_area_in_layout_coords(output);
