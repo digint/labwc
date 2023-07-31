@@ -907,28 +907,56 @@ view_on_output_destroy(struct view *view)
 	view->output = NULL;
 }
 
-#define VIEW_GET_NEXT_EDGES(_view_near_def, _view_far_def, _backward)	\
-	struct output *output = view->output;				\
-	struct server *server = output->server;				\
-	struct view *v;							\
-	wl_list_for_each(v, &server->views, link) {			\
-		if (v == view || v->output != output)			\
-			continue;					\
-		struct border margin = ssd_get_margin(v->ssd);		\
-		int vn = (_view_near_def);				\
-		int vf = (_view_far_def);				\
-		if (_backward) {					\
-			if (vf + far_gap  < point)			\
-				f = MAX(f, vf + far_gap  - point);	\
-			if (vn + near_gap < point)			\
-				n = MAX(n, vn + near_gap - point);	\
-		} else {						\
-			if (vf + far_gap  > point)			\
-				f = MIN(f, vf + far_gap  - point);	\
-			if (vn + near_gap > point)			\
-				n = MIN(n, vn + near_gap - point);	\
-		}							\
+static inline void _view_next_edges(int nvx, int nvy, int nvw, int nvh,
+		int nml, int nmt, int nmr, int nmb,
+		int fvx, int fvy, int fvw, int fvh,
+		int fml, int fmt, int fmr, int fmb,
+		int _backward, struct view *_view,
+		int far_gap, int near_gap,
+		int point, int *f, int *n)
+{
+	struct output *output = _view->output;
+	struct server *server = output->server;
+	struct view *v;
+	wl_list_for_each(v, &server->views, link) {
+		if (v == _view || v->output != output)
+			continue;
+		struct border margin = ssd_get_margin(v->ssd);
+		int vn = 0;
+		vn += nml * margin.left;
+		vn += nmt * margin.top;
+		vn += nmr * margin.right;
+		vn += nmb * margin.bottom;
+
+		vn += nvx * v->current.x;
+		vn += nvy * v->current.y;
+		vn += nvw * v->current.width;
+		vn += nvh * v->current.height;
+
+		int vf = 0;
+		vf += fml * margin.left;
+		vf += fmt * margin.top;
+		vf += fmr * margin.right;
+		vf += fmb * margin.bottom;
+
+		vf += fvx * v->current.x;
+		vf += fvy * v->current.y;
+		vf += fvw * v->current.width;
+		vf += fvh * v->current.height;
+
+		if (_backward) {
+			if (vf + far_gap  < point)
+				*f = MAX(*f, vf + far_gap  - point);
+			if (vn + near_gap < point)
+				*n = MAX(*n, vn + near_gap - point);
+		} else {
+			if (vf + far_gap  > point)
+				*f = MIN(*f, vf + far_gap  - point);
+			if (vn + near_gap > point)
+				*n = MIN(*n, vn + near_gap - point);
+		}
 	}
+}
 
 static void
 _view_get_next_edges(struct view *view, const char *direction, int point,
@@ -945,25 +973,25 @@ _view_get_next_edges(struct view *view, const char *direction, int point,
 	 */
 	int n = max, f = max;
 	if (!strcasecmp(direction, "left")) {
-		VIEW_GET_NEXT_EDGES(
-			v->current.x + v->current.width + margin.right,
-			v->current.x - margin.left,
-			true);
+		_view_next_edges(
+			1, 0, 1, 0,    0, 0, 1, 0,
+			1, 0, 0, 0,   -1, 0, 0, 0,
+			true, view, far_gap, near_gap, point, &f, &n);
 	} else if (!strcasecmp(direction, "up")) {
-		VIEW_GET_NEXT_EDGES(
-			v->current.y + v->current.height + margin.bottom,
-			v->current.y - margin.top,
-			true);
+		_view_next_edges(
+			0, 1, 0, 1,   0,  0, 0, 1,
+			0, 1, 0, 0,   0, -1, 0, 0,
+			true, view, far_gap, near_gap, point, &f, &n);
 	} else if (!strcasecmp(direction, "right")) {
-		VIEW_GET_NEXT_EDGES(
-			v->current.x - margin.left,
-			v->current.x + v->current.width + margin.right,
-			false);
+		_view_next_edges(
+			1, 0, 0, 0,   -1, 0, 0, 0,
+			1, 0, 1, 0,    0, 0, 1, 0,
+			false, view, far_gap, near_gap, point, &f, &n);
 	} else if (!strcasecmp(direction, "down")) {
-		VIEW_GET_NEXT_EDGES(
-			v->current.y - margin.top,
-			v->current.y + v->current.height + margin.bottom,
-			false);
+		_view_next_edges(
+			0, 1, 0, 0,   0, -1, 0, 0,
+			0, 1, 0, 1,   0,  0, 1, 0,
+			false, view, far_gap, near_gap, point, &f, &n);
 	}
 	*near = n; *far = f;
 }
