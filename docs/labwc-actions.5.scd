@@ -58,7 +58,7 @@ Actions are used in menus and keyboard/mouse bindings.
 	Resize window to fill the space between its edge and any other
 	window edge.
 
-        *direction* [left|up|right|down] Direction in which to grow.
+	*direction* [left|up|right|down] Direction in which to grow.
 
 *<action name="ShrinkToEdge" direction="value" />*
 	Reverse of GrowToEdge. Shrinks by a maximum of 50%.
