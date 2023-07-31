@@ -930,7 +930,6 @@ view_on_output_destroy(struct view *view)
 		}							\
 	}
 
-
 static void
 _view_get_next_edges(struct view *view, const char *direction, int point,
 		     int max, int near_gap, int far_gap, int *near, int *far)
