@@ -1019,8 +1019,7 @@ view_move_to_edge(struct view *view, const char *direction, const char *snap)
 			wlr_log(WLR_ERROR, "invalid direction: %s", direction);
 			return;
 		}
-	}
-	else if (!strcasecmp(snap, "screen")) {
+	} else if (!strcasecmp(snap, "screen")) {
 		if (!strcasecmp(direction, "left")) {
 			dx = em.left_max_dx;
 		} else if (!strcasecmp(direction, "up")) {
