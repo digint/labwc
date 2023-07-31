@@ -577,9 +577,9 @@ actions_run(struct view *activator, struct server *server,
 			break;
 		case ACTION_TYPE_MOVE_TO_EDGE:
 			if (view) {
-				const char *direction = get_arg_value_str(action, "direction", NULL);
+				const char *dir = get_arg_value_str(action, "direction", NULL);
 				const char *snap = get_arg_value_str(action, "snap", "window");
-				view_move_to_edge(view, direction, snap);
+				view_move_to_edge(view, dir, snap);
 			}
 			break;
 		case ACTION_TYPE_SNAP_TO_EDGE:
