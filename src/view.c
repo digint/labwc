@@ -932,7 +932,7 @@ view_on_output_destroy(struct view *view)
 
 static void
 _view_get_next_edges(struct view *view, const char *direction, int point,
-		     int max, int near_gap, int far_gap, int *near, int *far)
+		int max, int near_gap, int far_gap, int *near, int *far)
 {
 	/*
 	 * Returns near and far edges from all views, looking from
@@ -945,21 +945,25 @@ _view_get_next_edges(struct view *view, const char *direction, int point,
 	 */
 	int n = max, f = max;
 	if (!strcasecmp(direction, "left")) {
-		VIEW_GET_NEXT_EDGES(v->current.x + v->current.width + margin.right,
-				    v->current.x - margin.left,
-				    true);
+		VIEW_GET_NEXT_EDGES(
+			v->current.x + v->current.width + margin.right,
+			v->current.x - margin.left,
+			true);
 	} else if (!strcasecmp(direction, "up")) {
-		VIEW_GET_NEXT_EDGES(v->current.y + v->current.height + margin.bottom,
-				    v->current.y - margin.top,
-				    true);
+		VIEW_GET_NEXT_EDGES(
+			v->current.y + v->current.height + margin.bottom,
+			v->current.y - margin.top,
+			true);
 	} else if (!strcasecmp(direction, "right")) {
-		VIEW_GET_NEXT_EDGES(v->current.x - margin.left,
-				    v->current.x + v->current.width + margin.right,
-				    false);
+		VIEW_GET_NEXT_EDGES(
+			v->current.x - margin.left,
+			v->current.x + v->current.width + margin.right,
+			false);
 	} else if (!strcasecmp(direction, "down")) {
-		VIEW_GET_NEXT_EDGES(v->current.y - margin.top,
-				    v->current.y + v->current.height + margin.bottom,
-				    false);
+		VIEW_GET_NEXT_EDGES(
+			v->current.y - margin.top,
+			v->current.y + v->current.height + margin.bottom,
+			false);
 	}
 	*near = n; *far = f;
 }
